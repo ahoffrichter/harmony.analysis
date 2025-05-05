@@ -22,7 +22,7 @@ You can install the development version of harmony.analysis from
 
 ``` r
 # Install directly from GitHub
-devtools::install_github("yourusername/harmony.analysis")
+devtools::install_github("ahoffrichter/harmony.analysis")
 ```
 
 ``` r

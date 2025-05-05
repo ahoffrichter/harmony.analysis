@@ -1,0 +1,39 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# harmony.analysis
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of harmony.analysis is to filter field of view (FOV) data from harmony analysis depending on number of features (e.g. number of nuclei) per FOV. You can visualize the distribution of measurement points and choose a filtering range. You can also use which features should be summarised per well in the plate results. 
+
+The package will be extended in the future to also include further analysis of the data.
+
+## Installation
+
+You can install the development version of harmony.analysis from [GitHub](https://github.com/) with:
+
+``` r 
+# Install directly from GitHub
+devtools::install_github("yourusername/harmony.analysis")
+```
+
+``` r
+# install.packages("pak")
+pak::pak("ahoffrichter/harmony.analysis")
+```
+
+

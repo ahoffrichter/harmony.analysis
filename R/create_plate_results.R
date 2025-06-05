@@ -166,7 +166,7 @@ create_plate_results <- function(data_filtered_list,
 
     for(i in seq_along(spots_per_length_neurite)){
       df <- df |>
-        mutate(!!paste0(spots_per_length_neurite[i], "_per_legth_neurite") := .data[[matched_names[i]]]/(.data[["Neurite.Segments...Segment.Length_Sum_per_Well"]]*chosen_objective)*100)
+        mutate(!!paste0(spots_per_length_neurite[i], "_per_length_neurite") := .data[[matched_names[i]]]/(.data[["Neurite.Segments...Segment.Length_Sum_per_Well"]]*chosen_objective)*100)
     }
   }
 

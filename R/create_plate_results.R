@@ -33,8 +33,14 @@ create_plate_results <- function(data_filtered_list,
   objective <- match.arg(objective)
   chosen_objective <- switch(objective,
                              objective_40x = 0.2967,
-                             objective_63x = 0.18837)
+                             objective_63x = 0.18837,
+                             objective_20x = 0.59337)
   args <- list(...)  # capture all additional named arguments
+  # replace NA values with median
+  data_filtered_list <- map(data_filtered_list, ~ {
+    .x |>
+      mutate(across(where(is.numeric), ~ replace(., is.na(.), median(., na.rm = TRUE))))
+  })
 
   df <- unique(data_filtered_list[[paste0(feature_for_filter, "_filtered")]][,c("Row","Column","Timepoint")])
   rownames(df) <- NULL

@@ -18,7 +18,7 @@
 
 create_plate_results <- function(data_filtered_list,
                                  feature_for_filter = feature_for_filter,
-                                 objective = c("objective_40x", "objective_63x"),
+                                 objective = c("objective_40x", "objective_63x", "objective_20x"),
                                  number_of_objects = NULL,
                                  Mean_per_Well = NULL,
                                  StdDev_per_Well = NULL,

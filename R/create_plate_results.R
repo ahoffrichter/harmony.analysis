@@ -9,16 +9,18 @@
 #' @param Max_per_Well character vector containing names or partial names of the columns of which the max should be calculated
 #' @param Min_per_Well character vector containing names or partial names of the columns of which the min should be calculated
 #' @param Median_per_Well character vector containing names or partial names of the columns of which the median should be calculated
-#' @param spots_per_length_neurite haracter vector containing names or partial names of feature should for which number per neurite length should be calculated
+#' @param spots_per_length_neurite character vector containing names or partial names of feature/s for which the number of spots per neurite length should be calculated (per 100 µm)
+#' @param xx_segments_per_neurons character vector containing names or partial names of feature/s for which the sum of segment length/number of neuronal nuclei should be calculated
+#' @param proportion_x_y character vector of length 2, or list of character vectors of length 2; first element of the vector will be devided by the second element of the vector
 #' @param Neurite_Length_per_neuron TRUE or FALSE, should the neurite length per neuron be calculated. Default is NULL.
-#' @param ... additional arguments that can be passed to the function in order to add them to plate results. E.g. Cell_line, Compound, Replicate
+#' @param ... additional arguments that can be passed to the function in order to add them to plate results. E.g. Cell_line, Compound, Replicate; if passed as data.frame they must contain the Columns Row and Column
 #' @return data frame with plate results per well
 #' @export
 
 
 create_plate_results <- function(data_filtered_list,
                                  feature_for_filter = feature_for_filter,
-                                 objective = c("objective_40x", "objective_63x", "objective_20x"),
+                                 objective = c("objective_40x", "objective_63x", "objective_20x", "objective_10x"),
                                  number_of_objects = NULL,
                                  Mean_per_Well = NULL,
                                  StdDev_per_Well = NULL,
@@ -27,14 +29,15 @@ create_plate_results <- function(data_filtered_list,
                                  Min_per_Well = NULL,
                                  Median_per_Well = NULL,
                                  spots_per_length_neurite = NULL,
-                                 spots_per_100_um_neurite_length = NULL,
                                  Neurite_Length_per_neuron = NULL,
+                                 xx_segments_per_neurons = NULL,
                                  ...){
   objective <- match.arg(objective)
   chosen_objective <- switch(objective,
                              objective_40x = 0.2967,
                              objective_63x = 0.18837,
-                             objective_20x = 0.59337)
+                             objective_20x = 0.59337,
+                             objective_10x = 1.18675253)
   args <- list(...)  # capture all additional named arguments
   # replace NA values with median
   data_filtered_list <- map(data_filtered_list, ~ {
@@ -155,7 +158,10 @@ create_plate_results <- function(data_filtered_list,
       target <- target_names[i]
 
       # Perform case-insensitive matching
-      matches <- str_which(str_to_lower(names(df)), str_to_lower(target))
+      matches <- names(df)[
+        str_detect(str_to_lower(names(df)), str_to_lower(target)) &
+          str_detect(str_to_lower(names(df)), "number_of_objects")
+      ]
       if (length(matches) == 0) {
         warning(paste0("No match found for '", target, "'."))
         next
@@ -176,9 +182,70 @@ create_plate_results <- function(data_filtered_list,
     }
   }
 
+  # xx_segments_per_neurons
+
+  if (!is.null(xx_segments_per_neurons)){
+    # sum of "xx segments - neurite segment length µm"/ neuronal nuclei number of objects
+    target_names <- as.character(xx_segments_per_neurons)
+    matched_names <- character()
+    for(i in seq_along(target_names)){
+      target <- target_names[i]
+      matches <- names(df)[
+        str_detect(str_to_lower(names(df)), str_to_lower(target)) &
+          str_detect(str_to_lower(names(df)), str_to_lower("Neurite.Segment"))
+      ]
+      if (length(matches) == 0) {
+        warning(paste0("No match found for '", target, "'."))
+        next
+
+      } else if (length(matches) > 1) {
+        warning(paste0("Multiple matches found for '", target, "'. Using the first match: ", matches[1]))
+        matched_names[i] <- matches[1]
+
+      } else {
+        matched_names[i] <- matches
+        names(matched_names)[i] <- target
+      }
+
+    }
+    for(i in seq_along(xx_segments_per_neurons)){
+      df <- df |>
+        mutate(!!paste0(xx_segments_per_neurons[i], "length_per_neurons"):= .data[[matched_names[i]]]/.data[["neuronal_nuclei_number_of_objects"]])
+    }
+
+  }
   # Neurite_Length_per_neuron
   if(isTRUE(Neurite_Length_per_neuron)){
     df <- df |> mutate(Neurite_Length_per_neuron=(Neurite.Segments...Segment.Length_Sum_per_Well*chosen_objective)/neuronal_nuclei_number_of_objects)
+  }
+
+  # Proportion x/y
+  if(!is.null(proportion_x_y)){
+    if(!is.list(proportion_x_y)){
+      proportion_x_y <- list(proportion_x_y)
+    }
+
+    if(!every(proportion_x_y, ~ length(.) == 2)){
+      stop("proportion_x_y must be a vector of length 2, or a list of vectors of length 2")
+    }
+
+    targets_list <- map(proportion_x_y, ~find_partial_columns(data_filtered_list, .x))
+    tmp_df <- unique(data_filtered_list[[paste0(feature_for_filter, "_filtered")]][,c("Row","Column","Timepoint")])
+    rownames(df) <- NULL
+    for(i in seq_along(targets_list)){
+      for(j in seq_along(targets_list[[i]])){
+        tmp_df <- tmp_df |> left_join(data_filtered_list[[targets_list[[i]][[j]]$list_element]] |>
+                                        group_by(Row, Column, Timepoint) |>
+                                        summarise(!!paste0(targets_list[[i]][[j]]$column_name, "_Sum_per_Well") := sum(.data[[targets_list[[i]][[j]]$column_name]])))
+      }
+      tmp_df <- tmp_df |>
+        drop_na() |>
+        mutate(!!paste0("prop_", proportion_x_y[[i]][1], "_per_", proportion_x_y[[i]][2]):= (.data[[names(tmp_df)[length(names(tmp_df))-1]]]/.data[[names(tmp_df)[length(names(tmp_df))]]]))
+    }
+
+    df <- df |>
+      left_join(tmp_df |> select(Row, Column, Timepoint, starts_with("prop")))
+
   }
 
   # Analyzed fields (Neuronal nuclei)

@@ -7,7 +7,7 @@
 create_plate_results(
   data_filtered_list,
   feature_for_filter = feature_for_filter,
-  objective = c("objective_40x", "objective_63x", "objective_20x"),
+  objective = c("objective_40x", "objective_63x", "objective_20x", "objective_10x"),
   number_of_objects = NULL,
   Mean_per_Well = NULL,
   StdDev_per_Well = NULL,
@@ -16,8 +16,8 @@ create_plate_results(
   Min_per_Well = NULL,
   Median_per_Well = NULL,
   spots_per_length_neurite = NULL,
-  spots_per_100_um_neurite_length = NULL,
   Neurite_Length_per_neuron = NULL,
+  xx_segments_per_neurons = NULL,
   ...
 )
 }
@@ -42,11 +42,15 @@ create_plate_results(
 
 \item{Median_per_Well}{character vector containing names or partial names of the columns of which the median should be calculated}
 
-\item{spots_per_length_neurite}{haracter vector containing names or partial names of feature should for which number per neurite length should be calculated}
+\item{spots_per_length_neurite}{character vector containing names or partial names of feature/s for which the number of spots per neurite length should be calculated (per 100 µm)}
 
 \item{Neurite_Length_per_neuron}{TRUE or FALSE, should the neurite length per neuron be calculated. Default is NULL.}
 
-\item{...}{additional arguments that can be passed to the function in order to add them to plate results. E.g. Cell_line, Compound, Replicate}
+\item{xx_segments_per_neurons}{character vector containing names or partial names of feature/s for which the sum of segment length/number of neuronal nuclei should be calculated}
+
+\item{...}{additional arguments that can be passed to the function in order to add them to plate results. E.g. Cell_line, Compound, Replicate; if passed as data.frame they must contain the Columns Row and Column}
+
+\item{proportion_x_y}{character vector of length 2, or list of character vectors of length 2; first element of the vector will be devided by the second element of the vector}
 }
 \value{
 data frame with plate results per well

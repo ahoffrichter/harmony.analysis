@@ -17,21 +17,21 @@
 #' @return data frame with plate results per well
 #' @export
 
-
-create_plate_results <- function(data_filtered_list,
-                                 feature_for_filter = feature_for_filter,
-                                 objective = c("objective_40x", "objective_63x", "objective_20x", "objective_10x"),
-                                 number_of_objects = NULL,
-                                 Mean_per_Well = NULL,
-                                 StdDev_per_Well = NULL,
-                                 Sum_per_Well = NULL,
-                                 Max_per_Well = NULL,
-                                 Min_per_Well = NULL,
-                                 Median_per_Well = NULL,
-                                 spots_per_length_neurite = NULL,
-                                 Neurite_Length_per_neuron = NULL,
-                                 xx_segments_per_neurons = NULL,
-                                 ...){
+create_plate_results4 <- function(data_filtered_list,
+                                  feature_for_filter = feature_for_filter,
+                                  objective = c("objective_40x", "objective_63x", "objective_20x", "objective_10x"),
+                                  number_of_objects = NULL,
+                                  Mean_per_Well = NULL,
+                                  StdDev_per_Well = NULL,
+                                  Sum_per_Well = NULL,
+                                  Max_per_Well = NULL,
+                                  Min_per_Well = NULL,
+                                  Median_per_Well = NULL,
+                                  spots_per_length_neurite = NULL,
+                                  Neurite_Length_per_neuron = NULL,
+                                  xx_segments_per_neurons = NULL,
+                                  proportion_x_y = NULL,
+                                  ...){
   objective <- match.arg(objective)
   chosen_objective <- switch(objective,
                              objective_40x = 0.2967,
@@ -77,7 +77,7 @@ create_plate_results <- function(data_filtered_list,
     for(i in seq_along(matched_names)){
       df <- df |> left_join(data_filtered_list[[matched_names[i]]] |>
                               group_by(Row, Column, Timepoint) |>
-                              summarise(!!paste0(names(matched_names)[i], "_number_of_objects") := n()))
+                              summarise(!!paste0(names(matched_names)[i], "_number_of_objects") := n()/length(unique(Field))))
     }
   }
 
@@ -98,7 +98,7 @@ create_plate_results <- function(data_filtered_list,
     for(i in seq_along(targets_list)){
       df <- df |> left_join(data_filtered_list[[targets_list[[i]]$list_element]] |>
                               group_by(Row, Column, Timepoint) |>
-                              summarise(!!paste0(targets_list[[i]]$column_name, "_Sum_per_Well") := sum(.data[[targets_list[[i]]$column_name]])))
+                              summarise(!!paste0(targets_list[[i]]$column_name, "_Sum_per_Well") := sum(.data[[targets_list[[i]]$column_name]])/length(unique(Field))))
     }
   }
 
@@ -168,11 +168,10 @@ create_plate_results <- function(data_filtered_list,
 
       } else if (length(matches) > 1) {
         warning(paste0("Multiple matches found for '", target, "'. Using the first match: ", names(df)[matches[1]]))
-        matched_names[i] <- names(df)[matches[1]]
+        matched_names[i] <- matches[1]
 
       } else {
-        matched_names[i] <- names(df)[matches]
-        names(matched_names)[i] <- target
+        matched_names[i] <- matches
       }
     }
 
@@ -236,7 +235,7 @@ create_plate_results <- function(data_filtered_list,
       for(j in seq_along(targets_list[[i]])){
         tmp_df <- tmp_df |> left_join(data_filtered_list[[targets_list[[i]][[j]]$list_element]] |>
                                         group_by(Row, Column, Timepoint) |>
-                                        summarise(!!paste0(targets_list[[i]][[j]]$column_name, "_Sum_per_Well") := sum(.data[[targets_list[[i]][[j]]$column_name]])))
+                                        summarise(!!paste0(targets_list[[i]][[j]]$column_name, "_Sum_per_Well") := sum(.data[[targets_list[[i]][[j]]$column_name]])/length(unique(Field))))
       }
       tmp_df <- tmp_df |>
         drop_na() |>

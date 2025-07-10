@@ -17,7 +17,7 @@
 #' @return data frame with plate results per well
 #' @export
 
-create_plate_results4 <- function(data_filtered_list,
+create_plate_results <- function(data_filtered_list,
                                   feature_for_filter = feature_for_filter,
                                   objective = c("objective_40x", "objective_63x", "objective_20x", "objective_10x"),
                                   number_of_objects = NULL,

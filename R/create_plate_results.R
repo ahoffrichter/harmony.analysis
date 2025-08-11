@@ -146,9 +146,12 @@ create_plate_results <- function(data_filtered_list,
 
   if (!is.null(spots_per_length_neurite)){
     # targets_list <- find_partial_columns(data_filtered_list, spots_per_length_neurite)
-    df <- df |> left_join(data_filtered_list$data_neurite_segments_filtered |>
+    targets_list <- find_partial_columns(data_filtered_list, "Segment.Length")
+    df <- df |> left_join(data_filtered_list[[targets_list[[1]]$list_element]] |>
                             group_by(Row, Column, Timepoint) |>
-                            summarise(Neurite.Segments...Segment.Length_Sum_per_Well=sum(Neurite.Segments...Segment.Length)))
+                            summarise(Neurite.Segments...Segment.Length_Sum_per_Well = sum(
+
+                              .data[[targets_list[[1]]$column_name]])))
     target_names <- as.character(spots_per_length_neurite)
 
     # Store matched names

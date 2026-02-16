@@ -51,7 +51,7 @@ plots_distribution_before_after_filtering <- function(data_list, feature_for_fil
   plot_list <- list()
   for(i in seq_along(object_numbers_filtered_list)){
     plot_list[[i]] <- ggplot(object_numbers_filtered_list[[i]], aes(x=n))+
-      geom_histogram()+
+      geom_histogram(color="black", fill="white")+
       ggtitle(sub("^data_", "",names(data_list)[[i]]))
   }
 

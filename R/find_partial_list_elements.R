@@ -26,6 +26,7 @@ find_partial_list_elements <- function(data_filtered_list, number_of_objects){
     } else if (length(matches) > 1) {
       warning(paste0("Multiple matches found for '", target, "'. Using the first match: ", names(data_filtered_list)[matches[1]]))
       matched_names[i] <- names(data_filtered_list)[matches[1]]
+      names(matched_names)[i] <- target
 
     } else {
       matched_names[i] <- names(data_filtered_list)[matches]

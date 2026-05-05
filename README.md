@@ -37,5 +37,5 @@ remotes::install_github("ahoffrichter/harmony.analysis", force = TRUE)
 After installation you can check the package version with: 
 
 ``` r
-packageVersion("ahoffrichter/harmony.analysis")
+packageVersion("harmony.analysis")
 ```

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# harmony.analysis
+# harmony.analysis v. 1.0.1
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -28,4 +28,14 @@ devtools::install_github("ahoffrichter/harmony.analysis")
 ``` r
 # install.packages("pak")
 pak::pak("ahoffrichter/harmony.analysis")
+```
+
+``` r
+remotes::install_github("ahoffrichter/harmony.analysis", force = TRUE)
+```
+
+After installation you can check the package version with: 
+
+``` r
+packageVersion("ahoffrichter/harmony.analysis")
 ```
